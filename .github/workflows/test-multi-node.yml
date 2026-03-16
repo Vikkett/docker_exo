@@ -1,0 +1,32 @@
+name: Test Multi-Node Versions
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      # Le coeur de l'exercice : la matrice
+      matrix:
+        node-version: [18, 20, 22]
+
+    steps:
+      - name: Checkout le code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm' # Optionnel : accélère les builds futurs
+
+      - name: Installer les dépendances
+        run: npm install
+
+      - name: Lancer les tests
+        run: npm test
