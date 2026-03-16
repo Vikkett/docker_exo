@@ -7,7 +7,7 @@ on:
       - main
       - develop
     tags:
-      - 'v*' # Se déclenche pour v1.0, v2.1.4, etc.
+      - 'v*'
 
   # Déclenchement sur une Pull Request
   pull_request:
