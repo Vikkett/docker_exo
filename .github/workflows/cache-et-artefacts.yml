@@ -1,0 +1,51 @@
+name: Cache et Artefacts
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 1. Utilisation du Cache pour accélérer npm install
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm' # Utilise le cache natif de l'action setup-node
+
+      - name: Installer les dépendances
+        run: npm install
+
+      # 2. Générer le fichier build-info.txt
+      - name: Créer le fichier build-info
+        run: |
+          echo "Date du build : $(date)" > build-info.txt
+          echo "SHA du commit : ${{ github.sha }}" >> build-info.txt
+
+      # 3. Sauvegarder build-info.txt comme artefact
+      - name: Upload artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: info-du-build
+          path: build-info.txt
+
+  deploy:
+    # Ce job attend que le job 'build' soit terminé
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      # 4. Télécharger l'artefact
+      - name: Download artefact
+        uses: actions/download-artifact@v4
+        with:
+          name: info-du-build
+
+      # 5. Afficher le contenu
+      - name: Afficher le contenu de l'artefact
+        run: cat build-info.txt
